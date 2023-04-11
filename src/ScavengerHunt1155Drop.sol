@@ -2,8 +2,12 @@
 pragma solidity ^0.8.0;
 
 import "@thirdweb-dev/contracts/base/ERC1155LazyMint.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 contract ScavengerHunt1155Drop is ERC1155LazyMint {
+    using EnumerableSet for EnumerableSet.AddressSet;
+        
+    EnumerableSet.AddressSet private swapOfferAddresses;
 
     uint256[] winningTokenIds;
     bool public isHuntPaused = false;
@@ -105,6 +109,7 @@ contract ScavengerHunt1155Drop is ERC1155LazyMint {
         require(offers[msg.sender].from == address(0), "An address can only have one offer at a time.");
         
         offers[msg.sender] = SwapOffer(_from, _tokenId, _forTokenId);
+        swapOfferAddresses.add(_from);
 
         emit SwapOfferCreated(_from, _tokenId, _forTokenId);
     }
@@ -119,6 +124,7 @@ contract ScavengerHunt1155Drop is ERC1155LazyMint {
         uint256 forId = offers[msg.sender].forId;
 
         delete offers[msg.sender];
+        swapOfferAddresses.remove(msg.sender);
 
         emit SwapOfferCancelled(msg.sender, id, forId);
     }
@@ -128,6 +134,17 @@ contract ScavengerHunt1155Drop is ERC1155LazyMint {
      */    
     function getSwapOffer(address _from) public view returns (SwapOffer memory) {
         return offers[_from];
+    }
+
+    /**
+    * @notice returns an array of swap offers for all addresses that have open swap offers
+     */
+    function getActiveSwapOffers() public view returns (SwapOffer[] memory) {
+        SwapOffer[] memory offersArray = new SwapOffer[](swapOfferAddresses.length());
+        for (uint256 i = 0; i < swapOfferAddresses.length(); i++) {
+            offersArray[i] = offers[swapOfferAddresses.at(i)];
+        }
+        return offersArray;
     }
 
     /**
@@ -153,6 +170,8 @@ contract ScavengerHunt1155Drop is ERC1155LazyMint {
         // delete the offers
         delete offers[_from];
         delete offers[_to];
+        swapOfferAddresses.remove(_from);
+        swapOfferAddresses.remove(_to);
 
         emit SwapTrade(_from, _to);
     }

@@ -6,6 +6,7 @@
   "author": "thirdweb <eng@thirdweb.com>",
   "license": "MIT",
   "dependencies": {
+    "@openzeppelin/contracts": "^4.8.2",
     "@thirdweb-dev/contracts": "3.4.5-3"
   },
   "scripts": {
