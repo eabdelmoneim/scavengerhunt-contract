@@ -65,9 +65,6 @@ contract ScavengerHunt1155Drop is ERC1155LazyMint {
         // only allow claiming if the hunt is not paused
         require(isHuntPaused == false, "The hunt is paused");
 
-        // only allow claiming a token once
-        require(balanceOf[_claimer][_tokenId] == 0, "You already claimed this token");
-
         // only allow claiming of a quantity of 1
         require(_quantity == 1, "You can only claim one token at a time");
 
