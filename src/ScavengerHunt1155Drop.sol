@@ -91,6 +91,27 @@ contract ScavengerHunt1155Drop is ERC1155LazyMint {
     }
 
 // Swap functions
+
+   /**
+    * @notice admin function that allows the owner to swap an array of tokens from one user address for another array of tokens from another user address
+    */
+    function adminSwap(address _from, address _to, uint256[] memory _fromTokenIds, uint256[] memory _toTokenIds) public onlyOwner {
+        require(_fromTokenIds.length == _toTokenIds.length, "FROM token ids and TO token ids must be the same length.");
+  
+        uint256 len = _fromTokenIds.length;
+        uint256[] memory amounts = new uint256[](len);
+        
+        for (uint256 i = 0; i < len; i++) {
+            // require that the addresses have the token id
+            require(balanceOf[_from][_fromTokenIds[i]] >= 1, "Insufficient balance of FROM token id.");
+            require(balanceOf[_to][_toTokenIds[i]] >= 1, "Insufficient balance of TO token id.");
+            
+            amounts[i] = 1;
+        }
+        
+        _safeBatchTransferFrom(_from, _to, _fromTokenIds, amounts, bytes(""));
+        _safeBatchTransferFrom(_to, _from, _toTokenIds, amounts, bytes(""));
+    }
     
     /**
      * @notice Creates a swap offer for a token
